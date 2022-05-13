@@ -9,12 +9,17 @@ class Sudoku:
         
         # Initialize a game grid
         initialDomain = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        self.grid = [[(None, initialDomain.copy())] * 9 for i in range(9)]
+        self.grid = []
+        for _ in range(9):
+            row = []
+            for _ in range(9):
+                row.append((None, list(initialDomain)))
+            self.grid.append(row)
 
         # Setup this puzzle's unique unary constraints
         for value in initialConstraints:
             point = value[0]
-            self.grid[point[0]][point[1]] = (value[1], [])
+            self.grid[point[0]][point[1]] = (None, [value[1]])
 
     def get_variable_at_point(self, point):
         return self.grid[point[0]][point[1]]
@@ -42,24 +47,5 @@ class Sudoku:
             for j in range(3):
                 unit.append((boxX_offset + i, boxY_offset + j))
         return unit
-
-    def get_row_unit(self, point):
-        unit = []
-        for unit_point in self.get_row_unit_points(point):
-            unit.append(self.grid[unit_point[0]][unit_point[1]])
-        return unit
-
-    def get_col_unit(self, point):
-        unit = []
-        for unit_point in self.get_col_unit_points(point):
-            unit.append(self.grid[unit_point[0]][unit_point[1]])
-        return unit
-
-    def get_box_unit(self, point):
-        unit = []
-        for unit_point in self.get_box_unit_points(point):
-            unit.append(self.grid[unit_point[0]][unit_point[1]])
-        return unit
-
 
     

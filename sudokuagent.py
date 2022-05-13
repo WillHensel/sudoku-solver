@@ -1,58 +1,41 @@
 """
 This file defines an agent capable of solving a game of Sudoku defined in sudoku.py.
 """
+import queue
 
 class AC3Agent:
 
     def __init__(self, sudoku):
         self.sudoku = sudoku
         # Initialize a queue of binary constraints satisfying alldiff for each unit (row, column, 3x3 box)
-        self.binary_constraint_queue = []
-        self.initialize_constraint_queue(self.binary_constraint_queue)
-        print(len(self.binary_constraint_queue))
+        self.binary_constraint_queue = queue.Queue()
+        self.initialize_constraint_queue()
 
-    def create_constraint(self, point1, point2, queue):
-        forward_constraint = (point1, point2)
-        backward_constraint = (point2, point1)
-        if forward_constraint not in queue:
-            queue.append(forward_constraint)
-        if backward_constraint not in queue:
-            queue.append(backward_constraint)
+    def create_constraint(self, point1, point2):
+        constraint = (point1, point2)
+        self.binary_constraint_queue.put(constraint)
 
-    def initialize_constraint_queue(self, queue):
-
+    def initialize_constraint_queue(self):
         for i in range(9):
             for j in range(9):
                 point = (i, j)
-                row_unit = self.sudoku.get_row_unit_points(point)
-                col_unit = self.sudoku.get_col_unit_points(point)
-                box_unit = self.sudoku.get_box_unit_points(point)
-
-                for next_point in row_unit:
-                    if next_point != point:
-                        self.create_constraint(point, next_point, queue)
-
-                for next_point in col_unit:
-                    if next_point != point:
-                        self.create_constraint(point, next_point, queue)
-                
-                for next_point in box_unit:
-                    if next_point != point:
-                        self.create_constraint(point, next_point, queue)
+                self.push_constraining_neighbors(point)
     
     def ac_3(self):
-        while len(self.binary_constraint_queue) > 0:
-            constraint = self.binary_constraint_queue.pop(0)
+        while not self.binary_constraint_queue.empty():
+            constraint = self.binary_constraint_queue.get()
             if self.revise(constraint):
                 node = self.sudoku.get_variable_at_point(constraint[0])
                 if len(node[1]) == 0:
                     return False
-                self.find_constraining_neighbors(constraint[0])
+                self.push_constraining_neighbors(constraint[0], constraint[1])
         return True
     
     def revise(self, constraint):
-        node_i = self.sudoku.get_variable_at_point(constraint[0])
-        node_j = self.sudoku.get_variable_at_point(constraint[1])
+        point_i = constraint[0]
+        point_j = constraint[1]
+        node_i = self.sudoku.get_variable_at_point(point_i)
+        node_j = self.sudoku.get_variable_at_point(point_j)
         domain_i = node_i[1]
         domain_j = node_j[1]
         revised = False
@@ -67,22 +50,19 @@ class AC3Agent:
                 revised = True
         return revised
 
-    def find_constraining_neighbors(self, point):
+    def push_constraining_neighbors(self, source_point, except_point=None):
+        row_unit = self.sudoku.get_row_unit_points(source_point)
+        col_unit = self.sudoku.get_col_unit_points(source_point)
+        box_unit = self.sudoku.get_box_unit_points(source_point)
 
-        row_unit = self.sudoku.get_row_unit_points(point)
-        col_unit = self.sudoku.get_col_unit_points(point)
-        box_unit = self.sudoku.get_box_unit_points(point)
+        for next_point in row_unit + col_unit + box_unit:
+            if next_point != source_point:
+                if except_point is not None:
+                    if next_point != except_point:
+                        self.create_constraint(source_point, next_point)
+                    else:
+                        break
+                self.create_constraint(next_point, source_point)
 
-        for next_point in row_unit:
-            if next_point != point:
-                self.create_constraint(point, next_point, self.binary_constraint_queue)
-
-        for next_point in col_unit:
-            if next_point != point:
-                self.create_constraint(point, next_point, self.binary_constraint_queue)
-        
-        for next_point in box_unit:
-            if next_point != point:
-                self.create_constraint(point, next_point, self.binary_constraint_queue)
 
 
