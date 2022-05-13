@@ -48,4 +48,7 @@ class Sudoku:
                 unit.append((boxX_offset + i, boxY_offset + j))
         return unit
 
+    def replace_variable_at_point(self, point, var):
+        self.grid[point[0]][point[1]] = var
+
     

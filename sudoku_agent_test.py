@@ -19,7 +19,7 @@ class TestSudokuAgent(unittest.TestCase):
 
     def test_initialize_constraints_queue(self):
         sudoku = Sudoku(testGrid)
-        sudoku_agent = AC3Agent(sudoku)
+        sudoku_agent = SudokuAgent(sudoku)
         constraints = []
         while not sudoku_agent.binary_constraint_queue.empty():
             constraints.append(sudoku_agent.binary_constraint_queue.get())

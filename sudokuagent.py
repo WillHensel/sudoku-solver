@@ -3,13 +3,23 @@ This file defines an agent capable of solving a game of Sudoku defined in sudoku
 """
 import queue
 
-class AC3Agent:
+class SudokuAgent:
 
     def __init__(self, sudoku):
         self.sudoku = sudoku
         # Initialize a queue of binary constraints satisfying alldiff for each unit (row, column, 3x3 box)
         self.binary_constraint_queue = queue.Queue()
         self.initialize_constraint_queue()
+
+    def ac_3(self):
+        while not self.binary_constraint_queue.empty():
+            constraint = self.binary_constraint_queue.get()
+            if self.revise(constraint):
+                node = self.sudoku.get_variable_at_point(constraint[0])
+                if len(node[1]) == 0:
+                    return False
+                self.push_constraining_neighbors(constraint[0], constraint[1])
+        return True
 
     def create_constraint(self, point1, point2):
         constraint = (point1, point2)
@@ -21,16 +31,20 @@ class AC3Agent:
                 point = (i, j)
                 self.push_constraining_neighbors(point)
     
-    def ac_3(self):
-        while not self.binary_constraint_queue.empty():
-            constraint = self.binary_constraint_queue.get()
-            if self.revise(constraint):
-                node = self.sudoku.get_variable_at_point(constraint[0])
-                if len(node[1]) == 0:
-                    return False
-                self.push_constraining_neighbors(constraint[0], constraint[1])
-        return True
-    
+    def push_constraining_neighbors(self, source_point, except_point=None):
+        row_unit = self.sudoku.get_row_unit_points(source_point)
+        col_unit = self.sudoku.get_col_unit_points(source_point)
+        box_unit = self.sudoku.get_box_unit_points(source_point)
+
+        for next_point in row_unit + col_unit + box_unit:
+            if next_point != source_point:
+                if except_point is not None:
+                    if next_point != except_point:
+                        self.create_constraint(source_point, next_point)
+                    else:
+                        break
+                self.create_constraint(next_point, source_point)
+   
     def revise(self, constraint):
         point_i = constraint[0]
         point_j = constraint[1]
@@ -50,19 +64,24 @@ class AC3Agent:
                 revised = True
         return revised
 
-    def push_constraining_neighbors(self, source_point, except_point=None):
-        row_unit = self.sudoku.get_row_unit_points(source_point)
-        col_unit = self.sudoku.get_col_unit_points(source_point)
-        box_unit = self.sudoku.get_box_unit_points(source_point)
-
-        for next_point in row_unit + col_unit + box_unit:
-            if next_point != source_point:
-                if except_point is not None:
-                    if next_point != except_point:
-                        self.create_constraint(source_point, next_point)
-                    else:
-                        break
-                self.create_constraint(next_point, source_point)
+    def solve(self):
+        reduced = self.ac_3()
+        if not reduced:
+            return False
+        print('Puzzle passed AC_3')
+        continue_to_next_step = False
+        for i in range(9):
+            for j in range(9):
+                var = self.sudoku.get_variable_at_point((i, j))
+                if len(var[1]) != 1:
+                    continue_to_next_step = True
+                    break
+                else:
+                    self.sudoku.replace_variable_at_point((i, j), (var[1][0], []))
+        
+        if not continue_to_next_step:
+            return True
+        # else:
 
 
 
