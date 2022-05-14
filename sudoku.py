@@ -2,24 +2,26 @@
 This file defines the game of sudoku.
 """
 import math
+import os
 
 class Sudoku:
 
     def __init__(self, initialConstraints):
         
         # Initialize a game grid
-        initialDomain = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        initialDomain = [1,2,3,4,5,6,7,8,9]
         self.grid = []
-        for _ in range(9):
+        for i in range(9):
             row = []
-            for _ in range(9):
-                row.append((None, list(initialDomain)))
+            for j in range(9):
+                row.append(Variable((i, j), None, list(initialDomain)))
             self.grid.append(row)
 
         # Setup this puzzle's unique unary constraints
         for value in initialConstraints:
             point = value[0]
-            self.grid[point[0]][point[1]] = (None, [value[1]])
+            self.grid[point[0]][point[1]] = Variable(point, None, [value[1]])
+
 
     def get_variable_at_point(self, point):
         return self.grid[point[0]][point[1]]
@@ -48,7 +50,25 @@ class Sudoku:
                 unit.append((boxX_offset + i, boxY_offset + j))
         return unit
 
-    def replace_variable_at_point(self, point, var):
-        self.grid[point[0]][point[1]] = var
+    def print_grid(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        for i in range(9):
+            if i != 0 and i % 3 == 0:
+                print(str('-') * 7 * 3)
+            for j in range(9):
+                if j != 0 and j % 3 == 0:
+                    print('|', end=' ')
+                var = self.grid[i][j]
+                if var.value is None:
+                    print('*', end=' ')
+                else:
+                    print(var.value, end=' ')
+            print()
 
-    
+
+class Variable:
+
+    def __init__(self, position, value, domain):
+        self.position = position
+        self.value = value
+        self.domain = domain
