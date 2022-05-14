@@ -2,6 +2,7 @@
 This file defines an agent capable of solving a game of Sudoku defined in sudoku.py.
 """
 import queue
+import time
 
 class SudokuAgent:
 
@@ -25,6 +26,7 @@ class SudokuAgent:
     def backtrack(self, assignment):
         if self.check_assignment_complete(assignment):
             return True
+        self.sudoku.print_grid()
         prev = None
         if len(assignment) > 0:
             prev = assignment[len(assignment) - 1]
@@ -32,7 +34,6 @@ class SudokuAgent:
         for value in self.order_domain_values(var):
             assignment.append(var)
             var.value = value
-            self.sudoku.print_grid()
             if self.inference(var):
                 self.reduce_dependent_domains(var)
                 result = self.backtrack(assignment)
@@ -47,7 +48,8 @@ class SudokuAgent:
         dependencies = self.get_dependent_positions(var)
         for point in dependencies:
             dependent = self.sudoku.get_variable_at_point(point)
-            dependent.domain.append(var.value)
+            if var.value not in dependent.domain:
+                dependent.domain.append(var.value)
 
     def backtracking_search(self):
         return self.backtrack([])
@@ -160,14 +162,14 @@ class SudokuAgent:
 
     def select_unassigned_variable(self, assignment, prev):
         selection_set = None
-        if prev is not None:
-            selection_set = []
-            dependents = self.get_dependent_positions(prev)
-            if len(dependents) < 2:
-                selection_set = None
-            else:
-                for dependent in dependents:
-                    selection_set.append(self.sudoku.get_variable_at_point(dependent))
+        # if prev is not None:
+        #     selection_set = []
+        #     dependents = self.get_dependent_positions(prev)
+            # if len(dependents) < 2:
+            #     selection_set = None
+            # else:
+            # for dependent in dependents:
+            #     selection_set.append(self.sudoku.get_variable_at_point(dependent))
         if selection_set is None:
             selection_set = self.unassigned_vars
         else:
