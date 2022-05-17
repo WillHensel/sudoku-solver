@@ -4,7 +4,7 @@ This file defines an agent capable of solving a game of Sudoku defined in sudoku
 import queue
 import time
 
-class SudokuAgent:
+class SudokuSolverAgent:
 
     def __init__(self, sudoku):
         self.sudoku = sudoku
@@ -23,20 +23,17 @@ class SudokuAgent:
                 self.push_constraining_neighbors(constraint[0], constraint[1])
         return True
 
-    def backtrack(self, assignment):
+    def backtrack(self, assignment, order_domain_values_method):
         if self.check_assignment_complete(assignment):
             return True
         self.sudoku.print_grid()
-        prev = None
-        if len(assignment) > 0:
-            prev = assignment[len(assignment) - 1]
-        var = self.select_unassigned_variable(assignment, prev) # Gets most constrained variable
-        for value in self.order_domain_values(var):
+        var = self.select_unassigned_variable(assignment)
+        for value in order_domain_values_method(var):
             assignment.append(var)
             var.value = value
             if self.inference(var):
                 self.reduce_dependent_domains(var)
-                result = self.backtrack(assignment)
+                result = self.backtrack(assignment, order_domain_values_method)
                 if result:
                     return result
                 self.backtrack_dependent_domains(var)
@@ -52,7 +49,7 @@ class SudokuAgent:
                 dependent.domain.append(var.value)
 
     def backtracking_search(self):
-        return self.backtrack([])
+        return self.backtrack([], self.order_domain_values)
 
     def check_assignment_complete(self, assignment):
         if len(assignment) != len(self.unassigned_vars):
@@ -71,10 +68,7 @@ class SudokuAgent:
 
     def get_dependent_positions(self, var):
         pos = var.position
-        row_unit = self.sudoku.get_row_unit_points(pos)
-        col_unit = self.sudoku.get_col_unit_points(pos)
-        box_unit = self.sudoku.get_box_unit_points(pos)
-        dependencies = row_unit + col_unit + box_unit
+        dependencies = self.sudoku.get_all_unit_points(pos)
         return dependencies
 
     def inference(self, var):
@@ -114,9 +108,6 @@ class SudokuAgent:
             counts[min_index], counts[i] = counts[i], counts[min_index],
             domain[min_index], domain[i] = domain[i], domain[min_index]
         return domain
-        
-
-
 
     def push_constraining_neighbors(self, source_point, except_point=None):
         row_unit = self.sudoku.get_row_unit_points(source_point)
@@ -160,22 +151,7 @@ class SudokuAgent:
                 revised = True
         return revised
 
-    def select_unassigned_variable(self, assignment, prev):
-        selection_set = None
-        # if prev is not None:
-        #     selection_set = []
-        #     dependents = self.get_dependent_positions(prev)
-            # if len(dependents) < 2:
-            #     selection_set = None
-            # else:
-            # for dependent in dependents:
-            #     selection_set.append(self.sudoku.get_variable_at_point(dependent))
-        if selection_set is None:
-            selection_set = self.unassigned_vars
-        else:
-            for var in selection_set:
-                if var not in self.unassigned_vars:
-                    selection_set.remove(var)
+    def select_unassigned_variable(self, assignment):
         most_constrained = None
         for var in self.unassigned_vars:
             if most_constrained is None:

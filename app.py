@@ -1,23 +1,38 @@
 """
 This file is the main entry point to the Sudoku solver.
 """
+import sys
 from sudoku import *
-from sudokuagent import *
+from sudokusolveragent import *
 from my_csv import *
+from sudokuwriteragent import SudokuWriterAgent
 
 def main():
-    initial_conditions = import_puzzle("test_puzzles/hard_puzzle_1.csv")
-    game = Sudoku(initial_conditions)
-    agent = SudokuAgent(game)
-    solved = agent.solve()
-    if solved:
+    type = sys.argv[1]
+
+    if type == 'solve':
+        file_path = sys.argv[2]
+        if file_path is None:
+            print('Usage: python app.py solve <path_to_csv>')
+            return
+        initial_conditions = import_puzzle(file_path)
+        game = Sudoku(initial_conditions)
+        agent = SudokuSolverAgent(game)
+        solved = agent.solve()
+        if solved:
+            game.print_grid()
+        else:
+            print("Failed to solve")
+            for i in range(9):
+                for j in range(9):
+                    print(game.grid[i][j].domain, end=' ')
+                print()        
+    elif type == 'write':
+        agent = SudokuWriterAgent()
+        game = agent.write_puzzle()
         game.print_grid()
     else:
-        print("Failed to solve")
-        for i in range(9):
-            for j in range(9):
-                print(game.grid[i][j].domain, end=' ')
-            print()
+        print('Usage: python app.py <solve|write> <if solve: path_to_csv>')
 
 def import_puzzle(file):
     csv = CSV(file)

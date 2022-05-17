@@ -22,9 +22,19 @@ class Sudoku:
             point = value[0]
             self.grid[point[0]][point[1]] = Variable(point, None, [value[1]])
 
+    def contains_blanks(self):
+        for i in range(9):
+            for j in range(9):
+                var = self.get_variable_at_point((i, j))
+                if var.value is None:
+                    return True
+        return False
 
     def get_variable_at_point(self, point):
         return self.grid[point[0]][point[1]]
+
+    def get_all_unit_points(self, point):
+        return self.get_row_unit_points(point) + self.get_col_unit_points(point) + self.get_box_unit_points(point)
 
     def get_row_unit_points(self, point):
         unit = []

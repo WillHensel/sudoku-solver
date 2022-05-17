@@ -1,7 +1,7 @@
 import unittest
 
 from sudoku import *
-from sudokuagent import *
+from sudokusolveragent import *
 
 testGrid = [
         ((0, 1), 2), ((0, 2), 9), ((0, 5), 5), ((0, 6), 1), ((0, 7), 7),
@@ -19,7 +19,7 @@ class TestSudokuAgent(unittest.TestCase):
 
     def test_initialize_constraints_queue(self):
         sudoku = Sudoku(testGrid)
-        sudoku_agent = SudokuAgent(sudoku)
+        sudoku_agent = SudokuSolverAgent(sudoku)
         constraints = []
         while not sudoku_agent.binary_constraint_queue.empty():
             constraints.append(sudoku_agent.binary_constraint_queue.get())
