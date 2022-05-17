@@ -31,7 +31,6 @@ class SudokuWriterAgent:
         solver_agent.reduce_dependent_domains(first_assignment)
         solver_agent.unassigned_vars.remove(first_assignment)
         solver_agent.backtrack([first_assignment], self.order_domain_values)
-
         return self.sudoku
 
 

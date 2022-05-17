@@ -75,6 +75,17 @@ class Sudoku:
                     print(var.value, end=' ')
             print()
 
+    def verify_validity(self):
+        for row in self.grid:
+            for var in row:
+                dependent_points = self.get_all_unit_points(var.position)
+                for point in dependent_points:
+                    dependent_var = self.get_variable_at_point(point)
+                    if dependent_var is not var:
+                        if var.value == dependent_var.value:
+                            return False
+        return True
+
 
 class Variable:
 

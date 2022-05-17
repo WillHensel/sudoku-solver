@@ -21,6 +21,7 @@ def main():
         solved = agent.solve()
         if solved:
             game.print_grid()
+            print('Valid?: ' + str(game.verify_validity()))
         else:
             print("Failed to solve")
             for i in range(9):
@@ -31,6 +32,7 @@ def main():
         agent = SudokuWriterAgent()
         game = agent.write_puzzle()
         game.print_grid()
+        print('Valid?: ' + str(game.verify_validity()))
     else:
         print('Usage: python app.py <solve|write> <if solve: path_to_csv>')
 
