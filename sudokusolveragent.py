@@ -26,7 +26,7 @@ class SudokuSolverAgent:
     def backtrack(self, assignment, order_domain_values_method):
         if self.check_assignment_complete(assignment):
             return True
-        self.sudoku.print_grid()
+        # self.sudoku.print_grid()
         var = self.select_unassigned_variable(assignment)
         if var is None:
             return True

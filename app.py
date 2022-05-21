@@ -31,8 +31,8 @@ def main():
     elif type == 'write':
         agent = SudokuWriterAgent()
         game = agent.write_puzzle()
-        game.print_grid()
-        print('Valid?: ' + str(game.verify_validity()))
+        # game.print_grid()
+        # print('Valid?: ' + str(game.verify_validity()))
     else:
         print('Usage: python app.py <solve|write> <if solve: path_to_csv>')
 
