@@ -17,6 +17,7 @@ class SudokuSolverAgent:
         while not self.binary_constraint_queue.empty():
             constraint = self.binary_constraint_queue.get()
             if self.revise(constraint):
+                self.sudoku.print_domain_size_grid()
                 node = self.sudoku.get_variable_at_point(constraint[0])
                 if len(node.domain) == 0:
                     return False
@@ -26,7 +27,7 @@ class SudokuSolverAgent:
     def backtrack(self, assignment, order_domain_values_method):
         if self.check_assignment_complete(assignment):
             return True
-        # self.sudoku.print_grid()
+        self.sudoku.print_grid()
         var = self.select_unassigned_variable(assignment)
         if var is None:
             return True
@@ -169,6 +170,8 @@ class SudokuSolverAgent:
             return False
         print('Puzzle passed AC_3')
 
+        time.sleep(1)
+
         self.unassigned_vars = []
         continue_to_next_step = False
         for i in range(9):
@@ -179,7 +182,7 @@ class SudokuSolverAgent:
                     continue_to_next_step = True
                 else:
                     self.sudoku.grid[i][j].value = var.domain[0]
-        
+
         if not continue_to_next_step:
             return True
         

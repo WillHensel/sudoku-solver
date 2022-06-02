@@ -60,6 +60,18 @@ class Sudoku:
                 unit.append((boxX_offset + i, boxY_offset + j))
         return unit
 
+    def print_domain_size_grid(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        for i in range(9):
+            if i != 0 and i % 3 == 0:
+                print(str('-') * 7 * 3)
+            for j in range(9):
+                if j != 0 and j % 3 == 0:
+                    print('|', end=' ')
+                size = len(self.grid[i][j].domain)
+                print(size, end=' ')
+            print()
+
     def print_grid(self):
         os.system('cls' if os.name == 'nt' else 'clear')
         for i in range(9):

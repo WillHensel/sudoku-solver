@@ -11,13 +11,14 @@ class SudokuWriterAgent:
         self.sudoku = Sudoku([])
 
     def backtrack_assignments(self, deassignments):
-        if 81 - len(deassignments.keys()) < 10:
+        if 81 - len(deassignments.keys()) <= 20:
             return True
         self.sudoku.print_grid()
         variables = self.get_assigned_variables()
         random.shuffle(variables)
         for var in variables:
             deassignments[var] = var.value
+            self.update_dependent_domains_before_deassignment(var)
             var.value = None
             if self.check_for_unique_solution(var.position[0], var.position[1]):
                 result = self.backtrack_assignments(deassignments)
@@ -25,7 +26,8 @@ class SudokuWriterAgent:
                     return result
             var.value = deassignments[var]
             del deassignments[var]
-            variables = self.get_assigned_variables()
+            self.update_dependent_domains_after_reassignment(var)
+            # variables = self.get_assigned_variables()
             random.shuffle(variables)
         return False
 
@@ -94,6 +96,18 @@ class SudokuWriterAgent:
                     count = self.solve(row + 1, col, count)
         self.sudoku.grid[row][col].value = None
         return count
+
+    def update_dependent_domains_after_reassignment(self, var):
+        dependent_points = self.sudoku.get_all_unit_points(var.position)
+        for point in dependent_points:
+            dependent = self.sudoku.get_variable_at_point(point)
+            dependent.domain.remove(var.value)
+
+    def update_dependent_domains_before_deassignment(self, var):
+        dependent_points = self.sudoku.get_all_unit_points(var.position)
+        for point in dependent_points:
+            dependent = self.sudoku.get_variable_at_point(point)
+            dependent.domain.append(var.value)
 
     def write_puzzle(self):
         self.create_solution()

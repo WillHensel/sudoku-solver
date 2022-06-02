@@ -6,6 +6,7 @@ from sudoku import *
 from sudokusolveragent import *
 from my_csv import *
 from sudokuwriteragent import SudokuWriterAgent
+import copy
 
 def main():
     type = sys.argv[1]
@@ -21,7 +22,7 @@ def main():
         solved = agent.solve()
         if solved:
             game.print_grid()
-            print('Valid?: ' + str(game.verify_validity()))
+            # print('Valid?: ' + str(game.verify_validity()))
         else:
             print("Failed to solve")
             for i in range(9):
@@ -31,8 +32,12 @@ def main():
     elif type == 'write':
         agent = SudokuWriterAgent()
         game = agent.write_puzzle()
-        # game.print_grid()
-        # print('Valid?: ' + str(game.verify_validity()))
+        solve_game = copy.deepcopy(game)
+        solver = SudokuSolverAgent(solve_game)
+        solved = solver.solve()
+        game.print_grid()
+        print('Finished generating')
+        print('Solvable?: ', solved)
     else:
         print('Usage: python app.py <solve|write> <if solve: path_to_csv>')
 
