@@ -27,19 +27,26 @@ class SudokuSolverAgent:
     def backtrack(self, assignment, order_domain_values_method):
         if self.check_assignment_complete(assignment):
             return True
+
         self.sudoku.print_grid()
+
         var = self.select_unassigned_variable(assignment)
         if var is None:
             return True
+
         for value in order_domain_values_method(var):
             assignment.append(var)
             var.value = value
+
+            # Check if the assignment is arc-consistent
             if self.inference(var):
                 self.reduce_dependent_domains(var)
                 result = self.backtrack(assignment, order_domain_values_method)
                 if result:
                     return result
                 self.backtrack_dependent_domains(var)
+
+            # value didn't work
             assignment.remove(var)
             var.value = None
         return False
